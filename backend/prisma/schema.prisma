@@ -1,0 +1,106 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         String     @id @default(cuid())
+  name       String
+  email      String     @unique
+  password   String
+  createdAt  DateTime   @default(now())
+
+  identities Identity[]
+  alerts     Alert[]
+  scanJobs   ScanJob[]
+}
+
+model Identity {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  faissId   Int      @unique
+
+  userId  String
+  user    User     @relation(fields: [userId], references: [id])
+
+  matches Match[]
+}
+
+model Match {
+  id              String      @id @default(cuid())
+  createdAt       DateTime    @default(now())
+  imageUrl        String
+  screenshotUrl   String?
+  confidenceScore Float
+  status          MatchStatus @default(NEW)
+
+  identityId  String
+  identity    Identity @relation(fields: [identityId], references: [id])
+
+  siteId  String
+  site    Site   @relation(fields: [siteId], references: [id])
+
+  alert   Alert?
+}
+
+model Site {
+  id             String    @id @default(cuid())
+  createdAt      DateTime  @default(now())
+  name           String
+  url            String    @unique
+  lastCheckedAt  DateTime?
+  lastCheckImage String?
+
+  matches       Match[]
+  crawledImages CrawledImage[]
+}
+
+model Alert {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  isRead    Boolean  @default(false)
+
+  userId  String
+  user    User   @relation(fields: [userId], references: [id])
+
+  matchId String @unique
+  match   Match  @relation(fields: [matchId], references: [id])
+}
+
+model CrawledImage {
+  id        String   @id @default(cuid())
+  imageUrl  String   @unique
+  pageUrl   String
+  processed Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  siteId String
+  site   Site   @relation(fields: [siteId], references: [id])
+}
+
+model ScanJob {
+  id          String      @id @default(cuid())
+  createdAt   DateTime    @default(now())
+  completedAt DateTime?
+  status      ScanStatus  @default(PENDING)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+}
+
+enum MatchStatus {
+  NEW
+  REVIEWED
+  DISMISSED
+}
+
+enum ScanStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+}

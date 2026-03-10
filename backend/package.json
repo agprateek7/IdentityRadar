@@ -16,13 +16,18 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1005.0",
     "@prisma/client": "^5.22.0",
+    "axios": "^1.13.6",
     "bcryptjs": "^3.0.3",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
     "dotenv": "^17.3.1",
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
-    "prisma": "^5.22.0"
+    "multer": "^2.1.1",
+    "prisma": "^5.22.0",
+    "sharp": "^0.34.5",
+    "uuid": "^13.0.0"
   }
 }

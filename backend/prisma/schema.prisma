@@ -23,6 +23,7 @@ model Identity {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
   faissId   Int      @unique
+  faceImageUrl String
 
   userId  String
   user    User     @relation(fields: [userId], references: [id])

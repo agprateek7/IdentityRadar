@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from ai.face_embedding import generate_embedding
 from ai.vector_store import add_vector
@@ -19,9 +19,12 @@ async def health():
 
 @app.post('/embed')
 async def embed(req: EmbedRequest):
-    vector = generate_embedding(req.image_url)
-    faiss_id = add_vector(vector)
-    return {"faiss_id": faiss_id}
+    try:
+        vector = generate_embedding(req.image_url)
+        faiss_id = add_vector(vector, req.identity_id)
+        return {"faiss_id": faiss_id}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 @app.post('/search')
 async def search(req: SearchRequest):

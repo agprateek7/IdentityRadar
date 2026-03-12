@@ -19,8 +19,8 @@ def generate_embedding(image_url: str) -> list:
             model_name='Facenet512',
             enforce_detection=True
         )
-    except FaceNotDetected:
-          raise ValueError("No face detected in the image. Please upload a clear face photo.")
+    except ValueError:
+        raise ValueError("No face detected in the image. Please upload a clear face photo.")
 
     embedding = result[0]['embedding']
 

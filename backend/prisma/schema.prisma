@@ -8,25 +8,25 @@ datasource db {
 }
 
 model User {
-  id         String     @id @default(cuid())
-  name       String
-  email      String     @unique
-  password   String
-  createdAt  DateTime   @default(now())
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt @default(now())
 
   identities Identity[]
   alerts     Alert[]
-  scanJobs   ScanJob[]
 }
 
 model Identity {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  faissId   Int      @unique
+  id           String   @id @default(cuid())
+  createdAt    DateTime @default(now())
+  faissId      Int      @unique
   faceImageUrl String
 
-  userId  String
-  user    User     @relation(fields: [userId], references: [id])
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
 
   matches Match[]
 }
@@ -35,29 +35,32 @@ model Match {
   id              String      @id @default(cuid())
   createdAt       DateTime    @default(now())
   imageUrl        String
+  pageUrl String?
   screenshotUrl   String?
   confidenceScore Float
   status          MatchStatus @default(NEW)
 
-  identityId  String
-  identity    Identity @relation(fields: [identityId], references: [id])
+  identityId String
+  identity   Identity @relation(fields: [identityId], references: [id])
 
-  siteId  String
-  site    Site   @relation(fields: [siteId], references: [id])
+  siteId String
+  site   Site   @relation(fields: [siteId], references: [id])
 
-  alert   Alert?
+  alert Alert?
 }
 
 model Site {
-  id             String    @id @default(cuid())
-  createdAt      DateTime  @default(now())
-  name           String
-  url            String    @unique
-  lastCheckedAt  DateTime?
-  lastCheckImage String?
+  id            String    @id @default(cuid())
+  createdAt     DateTime  @default(now())
+  name          String
+  url           String    @unique
+  subreddit     String? // e.g. "r/pics", "r/all", "r/people"
+  isActive      Boolean   @default(true) 
+  crawlInterval Int       @default(60)
+  lastCheckedAt DateTime?
 
-  matches       Match[]
-  crawledImages CrawledImage[]
+  matches  Match[]
+  scanJobs ScanJob[]
 }
 
 model Alert {
@@ -65,32 +68,25 @@ model Alert {
   createdAt DateTime @default(now())
   isRead    Boolean  @default(false)
 
-  userId  String
-  user    User   @relation(fields: [userId], references: [id])
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
 
   matchId String @unique
   match   Match  @relation(fields: [matchId], references: [id])
 }
 
-model CrawledImage {
-  id        String   @id @default(cuid())
-  imageUrl  String   @unique
-  pageUrl   String
-  processed Boolean  @default(false)
-  createdAt DateTime @default(now())
+model ScanJob {
+  id           String     @id @default(cuid())
+  createdAt    DateTime   @default(now())
+  status       ScanStatus @default(PENDING)
+  imagesFound  Int        @default(0)
+  matchesFound Int        @default(0)
+  errorMessage String?
+  startedAt    DateTime?
+  completedAt  DateTime?
 
   siteId String
   site   Site   @relation(fields: [siteId], references: [id])
-}
-
-model ScanJob {
-  id          String      @id @default(cuid())
-  createdAt   DateTime    @default(now())
-  completedAt DateTime?
-  status      ScanStatus  @default(PENDING)
-
-  userId String
-  user   User   @relation(fields: [userId], references: [id])
 }
 
 enum MatchStatus {

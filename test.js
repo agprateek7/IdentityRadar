@@ -1,1 +1,1 @@
-const user = null; console.log(user.id);
+const user = null; console.log(user.'id');
